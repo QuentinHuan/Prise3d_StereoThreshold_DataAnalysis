@@ -123,7 +123,7 @@ def test_MLE_procedure(B,N,bShowPlots):
 def next_stimulus_MLE(dataX,dataY):
     # experiment beginning: first stimulus is in sampling space center
     if len(dataX)==0:
-        return 250
+        return 10
     else:
         # make sure it's a float32 array
         dataX=np.asarray(dataX,dtype=np.float32)
