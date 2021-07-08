@@ -5,6 +5,7 @@ from scipy.optimize import curve_fit
 from scipy.optimize import minimize
 from scipy.special import expit
 from scipy.interpolate import interp1d
+import os
 
 # sort the data of the scene 'sceneName'
 # return a list of list. Each list contains all the patches in this image section (see utility.XYtoID() for order)
@@ -12,6 +13,8 @@ from scipy.interpolate import interp1d
 def sort_data(resultFilePath):
     path="data"
     thresholds=[[] for i in range(16)]
+    if (not os.path.exists(resultFilePath)):
+        open(resultFilePath, 'a').close()
     with open(resultFilePath,"r") as F:
         data = F.readlines()
         for l in data:
