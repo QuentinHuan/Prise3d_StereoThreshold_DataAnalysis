@@ -17,7 +17,8 @@ import matplotlib.pyplot as plt
 import process_data as pd
 import Output as out
 
-imagePath="/home/stagiaire/Bureau/image/stereo"
+imagePath="/home/stagiaire/Bureau/image/8pov"
+#imagePath="/home/stagiaire/git/Prise3d_StereoThreshold_Alioscopy/Prise3d_StereoThreshold_DataAnalysis/img"
 #imagePath="E:\image\Stereo"
 
 #path="data/p3d_arcsphere_results.log"
@@ -35,7 +36,7 @@ for s in sceneList:
     path="data/"+s+"_results.log"
     MP=True
     #out.showResult(path,MP)
-    out.show_thresholdImage(path,imagePath,False,MP)
+    out.show_thresholdImage_8pov(path,imagePath,False,MP)
     
 
 #MP=False
