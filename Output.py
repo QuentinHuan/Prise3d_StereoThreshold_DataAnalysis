@@ -114,7 +114,10 @@ def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimat
         side = str(i)
         imgOut=Image.new('RGB', (360, 360))
         saveDir = "./img/"+sceneName+"-0"+side
-        os.mkdir(saveDir)
+
+        if(not os.path.isdir(saveDir)):
+            os.mkdir(saveDir)
+
         for j in range(4):
             for i in range(4):
                 im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
