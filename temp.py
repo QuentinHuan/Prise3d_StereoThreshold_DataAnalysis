@@ -26,7 +26,8 @@ imagePath="/home/stagiaire/Bureau/image/stereo"
 #path="data/p3d_crown_results.log"
 #path="data/p3d_indirect_results.log"
 
-sceneList=["p3d_arcsphere","p3d_contemporary-bathroom","p3d_caustic-view0","p3d_crown","p3d_indirect"]
+#sceneList=["p3d_arcsphere","p3d_contemporary-bathroom","p3d_caustic-view0","p3d_crown","p3d_indirect"]
+sceneList=["p3d_kitchen-view0","p3d_kitchen-view1","p3d_landscape-view3","p3d_sanmiguel-view1","p3d_sanmiguel-view2"]
 #sceneList=["p3d_indirect"]
 for s in sceneList:
     print("")
