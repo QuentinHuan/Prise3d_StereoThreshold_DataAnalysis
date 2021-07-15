@@ -20,14 +20,21 @@ import Output as out
 #path="data/p3d_arcsphere_results.log"
 #path="data/p3d_contemporary-bathroom_results.log"
 #path="data/p3d_caustic-view0_results.log"
-path="data/p3d_crown_results.log"
+#path="data/p3d_crown_results.log"
 #path="data/p3d_indirect_results.log"
-MP=True
-out.showResult(path,MP)
-#out.show_thresholdImage(path,"C:\Users\MMO\Desktop\expp3d\image",False,MP)
 
-MP=False
-out.showResult(path,MP)
+sceneList=["p3d_arcsphere","p3d_contemporary-bathroom","p3d_caustic-view0","p3d_crown","p3d_indirect"]
+#sceneList=["p3d_indirect"]
+for s in sceneList:
+    print("")
+    print(s)
+    path="data/"+s+"_results.log"
+    MP=True
+    #out.showResult(path,MP)
+    out.show_thresholdImage(path,"E:\image\Stereo",False,MP)
+
+#MP=False
+#out.showResult(path,MP)
 #out.show_thresholdImage(path,"C:\Users\MMO\Desktop\expp3d\image",False,MP)
 
 plt.show()

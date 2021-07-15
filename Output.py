@@ -15,6 +15,7 @@ def compute_thresholds(resultFilePath,finalEstimation=False):
     dataX=[]
     dataY=[]
     result=pd.sortDataToXY(resultFilePath)
+    print("number of observations per blocks :"+str(len(result[1][0])))
     print("compute_thresholds for :" + resultFilePath)
     for i in range(16):
         dataX = np.asarray(result[i][0],dtype=np.float32)
@@ -38,9 +39,9 @@ def compute_thresholds(resultFilePath,finalEstimation=False):
 def showResult(resultFilePath,finalEstimation=False):
     print("----------------------------")
     print("showResult :"+resultFilePath)
-    result=pd.sortDataToXY(resultFilePath)
     T = compute_thresholds(resultFilePath,finalEstimation)
-    print("number of observations per blocks :"+str(len(result[0][0])))
+
+    result=pd.sortDataToXY(resultFilePath)
     fig, axes = plt.subplots(4,4, sharex=True, sharey=True)
     fig.suptitle(resultFilePath.replace("data/","").replace("_results.log","")+" --MP="+str(int(finalEstimation)), fontsize=16)
     for i in range(4):
@@ -80,8 +81,8 @@ def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=F
     else:
         imgOut=Image.new('RGB', (800, 800))
         
-    for i in range(4):
-        for j in range(4):
+    for j in range(4):
+        for i in range(4):
             side="right"
             im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
             region_l = im_l.crop((i*200, j*200, (i+1)*200, (j+1)*200))

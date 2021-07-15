@@ -34,4 +34,3 @@ for i in range(16):
     stimulus=stimulus+str(MLE.next_stimulus_MLE(dataX,dataY))
     if i!=15: stimulus=stimulus+"," # add coma, exept for last one
 print(stimulus)
-
