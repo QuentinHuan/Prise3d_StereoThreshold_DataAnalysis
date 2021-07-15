@@ -173,24 +173,5 @@ def process_one_log(logPath,logName):
     for f in logs:
         print("generated: " + f)
 
-#process_one_log("E:\git\Prise3D_StereoThreshold\ExperimentData\Resultats 20052021\exclude","P3d_Expe1.log")
-#process_all_log("E:\git\Prise3D_StereoThreshold\ExperimentData\Resultats 20052021")
-
-#scenes=["arcsphere","contemporary-bathroom","caustic-view0","p3d_crown_results","p3d_indirect_results"]
-#
-#path="data/p3d_arcsphere_results.log"
-#path="data/p3d_contemporary-bathroom_results.log"
-##path="data/p3d_caustic-view0_results.log"
-#path="data/p3d_crown_results.log"
-#path="data/p3d_indirect_results.log"
-#show_thresholdImage(path,"../../../image",True)
-
-#out.showResult(path,False)
-#out.showResult(path,True)
-
-#out.show_thresholdImage(path,"../../../image",True,False)
-#out.show_thresholdImage(path,"../../../image",True,True)
-#out.plt.show()
-
 
 

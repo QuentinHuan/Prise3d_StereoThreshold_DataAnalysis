@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 import process_data as pd
 import Output as out
 
+imagePath="/home/stagiaire/Bureau/image/stereo"
+#imagePath="E:\image\Stereo"
+
 #path="data/p3d_arcsphere_results.log"
 #path="data/p3d_contemporary-bathroom_results.log"
 #path="data/p3d_caustic-view0_results.log"
@@ -31,7 +34,8 @@ for s in sceneList:
     path="data/"+s+"_results.log"
     MP=True
     #out.showResult(path,MP)
-    out.show_thresholdImage(path,"E:\image\Stereo",False,MP)
+    out.show_thresholdImage(path,imagePath,False,MP)
+    
 
 #MP=False
 #out.showResult(path,MP)

@@ -7,6 +7,8 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.optimize import minimize
+import os
+import systemd
 
 # return a list of the perceptive thresholds (refers to the image ID)
 # threshold_spp = 20*threshold[ID]
@@ -96,4 +98,29 @@ def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=F
     
                 imgOut.paste(region_r,(i*200+800, j*200))
     imgOut.save("./img/Thresh_"+sceneName+suffix+".png")
+    print("image saved to: "+"./img/Thresh_"+sceneName+suffix+".png")
+
+# generate the reconstructed images (8pov)
+def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimation=False):
+    T = compute_thresholds(resultFilePath,finalEstimation)
+    suffix="MLE"
+    if finalEstimation==True:
+        suffix=suffix+"_MP"
+    print("----------------------------")
+    print("show_thresholdImage for "+resultFilePath)
+    sceneName=resultFilePath.replace("data/p3d_","").replace("_results.log","")
+   
+    for i in range(1,9):
+        side = str(i)
+        imgOut=Image.new('RGB', (360, 360))
+        saveDir = "./img/"+sceneName+"-0"+side
+        os.mkdir(saveDir)
+        for j in range(4):
+            for i in range(4):
+                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
+                region_l = im_l.crop((i*90, j*90, (i+1)*90, (j+1)*90))
+                imgOut.paste(region_l,(i*90, j*90))
+        
+        imgOut.save(saveDir+"/p3d_"+sceneName+"-0"+side+"_"+  str(1).zfill(5) +".png")
+        print(str(i) + "/8")
     print("image saved to: "+"./img/Thresh_"+sceneName+suffix+".png")
