@@ -117,7 +117,7 @@ def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimat
         os.mkdir(saveDir)
         for j in range(4):
             for i in range(4):
-                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
+                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
                 region_l = im_l.crop((i*90, j*90, (i+1)*90, (j+1)*90))
                 imgOut.paste(region_l,(i*90, j*90))
         
