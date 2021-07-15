@@ -28,7 +28,7 @@ install scripts:
 
 # Check if everything is working as expected:
 
-* run ```python /pathToScript/ComputeNewStimulusSet.py p3d_contemporary-bathroom``` (or some other scene present in ```/pathToScript/data```).
+* run in a terminal ```python /pathToScript/ComputeNewStimulusSet.py p3d_contemporary-bathroom``` (or some other scene present in ```/pathToScript/data```).
 script should print something of the sort: ```177,267,216,77,77,254,77,206,259,293,245,77,234,247,77,77```
 
 if the script run into an error, it's probably because some dependencies are not met:
