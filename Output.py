@@ -69,15 +69,11 @@ def showResult(resultFilePath,finalEstimation=False):
 
 # generate an image made of all the threshold images
 # bStereo = True to generate the stereo pair
-def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=False):
+def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=False,side="right"):
     T = compute_thresholds(resultFilePath,finalEstimation)
-    suffix="MLE"
-    if finalEstimation==True:
-        suffix=suffix+"_MP"
     print("----------------------------")
     print("show_thresholdImage for "+resultFilePath)
     sceneName=resultFilePath.replace("data/p3d_","").replace("_results.log","")
-    side = "right"
     if(bStereo==True):
         imgOut=Image.new('RGB', (800*2, 800))
     else:
@@ -85,7 +81,6 @@ def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=F
         
     for j in range(4):
         for i in range(4):
-            side="right"
             im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
             region_l = im_l.crop((i*200, j*200, (i+1)*200, (j+1)*200))
 
@@ -97,8 +92,13 @@ def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=F
                 region_r = im_r.crop((i*200, j*200, (i+1)*200, (j+1)*200))
     
                 imgOut.paste(region_r,(i*200+800, j*200))
-    imgOut.save("./img/Thresh_"+sceneName+suffix+".png")
-    print("image saved to: "+"./img/Thresh_"+sceneName+suffix+".png")
+
+    saveDir = "./img/p3d_"+sceneName+"-"+side
+    if(not os.path.isdir(saveDir)):
+        os.mkdir(saveDir)
+    output=saveDir+"/p3d_"+sceneName+"-"+side+"_00001.png"
+    imgOut.save(output)
+    print("image saved to: "+output)
 
 # generate the reconstructed images (8pov)
 def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimation=False):
