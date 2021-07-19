@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 import process_data as pd
 import Output as out
 
-#imagePath="/home/stagiaire/Bureau/image/8pov"
-imagePath="/home/stagiaire/Bureau/image/stereo"
+imagePath="/home/stagiaire/Bureau/image/8pov"
+#imagePath="/home/stagiaire/Bureau/image/stereo"
 #imagePath="E:\image\Stereo"
 
 #path="data/p3d_arcsphere_results.log"
@@ -27,9 +27,9 @@ imagePath="/home/stagiaire/Bureau/image/stereo"
 #path="data/p3d_crown_results.log"
 #path="data/p3d_indirect_results.log"
 
-sceneList=["p3d_arcsphere","p3d_contemporary-bathroom","p3d_caustic-view0","p3d_crown","p3d_indirect"]
+#sceneList=["p3d_arcsphere","p3d_contemporary-bathroom","p3d_caustic-view0","p3d_crown","p3d_indirect"]
 #sceneList=["p3d_kitchen-view0","p3d_kitchen-view1","p3d_landscape-view3","p3d_sanmiguel-view1","p3d_sanmiguel-view2"]
-#sceneList=["p3d_indirect"]
+sceneList=["p3d_crown"]
 for s in sceneList:
     print("")
     print(s)
@@ -37,8 +37,9 @@ for s in sceneList:
     MP=True
     #out.showResult(path,MP)
     #out.show_thresholdImage_8pov(path,imagePath,False,MP)
-    out.show_thresholdImage(path,imagePath,False,finalEstimation=True,side="right")
-    out.show_thresholdImage(path,imagePath,False,finalEstimation=True,side="left")
+    out.show_thresholdImage_8pov_smooth(path,imagePath,False,MP)
+    #out.show_thresholdImage(path,imagePath,False,finalEstimation=True,side="right")
+    #out.show_thresholdImage(path,imagePath,False,finalEstimation=True,side="left")
     
 
 #MP=False
