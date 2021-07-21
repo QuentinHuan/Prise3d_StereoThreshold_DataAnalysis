@@ -32,7 +32,7 @@ def compute_thresholds(resultFilePath,finalEstimation=False):
             #MP reconstruction threshold finder
             params = [1,max(pd.reconstruct_MP(dataX,dataY),params[1])]
         
-        T.append((params[0],max([int(params[1]),1])))
+        T.append(max([int(params[1]),1]))
     return T
     
 # show the logistic plots and threshold values
@@ -77,14 +77,14 @@ def show_thresholdImage(resultFilePath,imgDataBasePath,bStereo,finalEstimation=F
         
     for j in range(4):
         for i in range(4):
-            im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
+            im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(T[i + 4*j]).zfill(5) +".png")
             region_l = im_l.crop((i*200, j*200, (i+1)*200, (j+1)*200))
 
             imgOut.paste(region_l,(i*200, j*200))
             
             if(bStereo==True):
                 side="left"
-                im_r = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
+                im_r = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(T[i + 4*j]).zfill(5) +".png")
                 region_r = im_r.crop((i*200, j*200, (i+1)*200, (j+1)*200))
     
                 imgOut.paste(region_r,(i*200+800, j*200))
@@ -116,7 +116,7 @@ def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimat
 
         for j in range(4):
             for i in range(4):
-                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(T[i + 4*j][1]).zfill(5) +".png")
+                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(T[i + 4*j]).zfill(5) +".png")
                 region_l = im_l.crop((i*90, j*90, (i+1)*90, (j+1)*90))
                 imgOut.paste(region_l,(i*90, j*90))
         
@@ -136,7 +136,7 @@ def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,res
     SPP = []
     for j in range(4):
         for i in range(4):
-            SPP.append(T[i + 4*j][1])
+            SPP.append(T[i + 4*j])
     SPP = np.asarray(SPP)
     SPP = np.reshape(SPP,(16,))
 
@@ -155,17 +155,19 @@ def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,res
         img=f(np.linspace(-0.5,3.5,resX),np.linspace(-0.5,3.5,resY))
 
     SPP_Interp=np.asarray(img,dtype=np.uint32)
-    SPP_Interp=np.clip(SPP_Interp,1,500)
+    #SPP_Interp=np.clip(SPP_Interp,1,500)
     #Image.fromarray(SPP_Interp).show() # debug
     valueList=np.unique(SPP_Interp)
     imgOut=Image.new('RGB', (resX, resY))
     # for each spp values : load spp image and copy corresponding pixel on final image
     for i in valueList:
-        if(side == "right" or side == "left"):
+        if(side == "right" or side == "left"):#stereo threshold images
             im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(i).zfill(5) +".png")
         else:
-            im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(i).zfill(5) +".png")
-
+            if(side==""): #2d threshold images
+                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"/p3d_"+sceneName+"_"+  str(i).zfill(5) +".png")
+            else: #8pov threshold images
+                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(i).zfill(5) +".png")
         result = np.where(SPP_Interp == i)
         #print(result)
         for r in range(0,len(result[0])):
@@ -181,8 +183,12 @@ def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,res
             saveDir = "./img/p3d_"+sceneName+"-"+side
             output=saveDir+"/p3d_"+sceneName+"-"+side+"_00001.png"
         else:
-            saveDir = "./img/p3d_"+sceneName+"-0"+side
-            output=saveDir+"/p3d_"+sceneName+"-0"+side+"_00001.png"
+            if(side==""): #2d threshold images
+                saveDir = "./img/p3d_"+sceneName
+                output=saveDir+"/p3d_"+sceneName+"_00001.png"
+            else:
+                saveDir = "./img/p3d_"+sceneName+"-0"+side
+                output=saveDir+"/p3d_"+sceneName+"-0"+side+"_00001.png"
         if(not os.path.isdir(saveDir)):
             os.mkdir(saveDir)
         imgOut.save(output)
