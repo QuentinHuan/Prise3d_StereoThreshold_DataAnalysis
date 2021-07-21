@@ -9,8 +9,8 @@ from scipy.optimize import curve_fit
 from scipy.optimize import minimize
 from scipy.interpolate import interp2d
 from scipy.interpolate import griddata
+from scipy.interpolate import NearestNDInterpolator
 import os
-import systemd
 
 # return a list of the perceptive thresholds (refers to the image ID)
 # threshold_spp = 20*threshold[ID]
@@ -19,8 +19,9 @@ def compute_thresholds(resultFilePath,finalEstimation=False):
     dataX=[]
     dataY=[]
     result=pd.sortDataToXY(resultFilePath)
+    sceneName=resultFilePath.replace("data/","").replace("_results.log","")
+    print("compute_thresholds for : " + sceneName)
     print("number of observations per blocks :"+str(len(result[1][0])))
-    print("compute_thresholds for :" + resultFilePath)
     for i in range(16):
         dataX = np.asarray(result[i][0],dtype=np.float32)
         dataY = np.asarray(result[i][1],dtype=np.float32)
@@ -30,20 +31,13 @@ def compute_thresholds(resultFilePath,finalEstimation=False):
         if(finalEstimation==True):
             #MP reconstruction threshold finder
             params = [1,max(pd.reconstruct_MP(dataX,dataY),params[1])]
-
-
-        #print("cell "+str(i)+":")
-        #print("parameters = ")
         
         T.append((params[0],max([int(params[1]),1])))
-    print(T)
     return T
     
 # show the logistic plots and threshold values
-def showResult(resultFilePath,finalEstimation=False):
-    print("----------------------------")
-    print("showResult :"+resultFilePath)
-    T = compute_thresholds(resultFilePath,finalEstimation)
+def showResult(Threshold,resultFilePath,finalEstimation=False):
+    T = Threshold
 
     result=pd.sortDataToXY(resultFilePath)
     fig, axes = plt.subplots(4,4, sharex=True, sharey=True)
@@ -129,26 +123,14 @@ def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimat
         imgOut.save(saveDir+"/p3d_"+sceneName+"-0"+side+"_"+  str(1).zfill(5) +".png")
         print(str(r) + "/8")
     print("image saved to: "+"./img/Thresh_"+sceneName+suffix+".png")
-
-def getSPP(SPP,i,j):
-    return SPP[int(np.clip(i,0,3)),int(np.clip(j,0,3))]
         
-
-# generate the reconstructed images (8pov)
-def show_thresholdImage_8pov_smooth(resultFilePath,imgDataBasePath,bStereo,finalEstimation=False):
-    resX=360
-    resY=360
-
-
-    T = compute_thresholds(resultFilePath,finalEstimation)
-    suffix="MLE"
-    if finalEstimation==True:
-        suffix=suffix+"_MP"
-    print("----------------------------")
-    print("show_thresholdImage for "+resultFilePath)
+# generate the reconstructed images (8pov) : smooth transitions between blocks
+# resX and resY resoltuition of the image in pixels
+# side = "1"/"2"/.../"8" for 8pov or "left"/"right" for stereo 
+def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,resY,side,method="nearest",show=False):
+    # threshold computation
+    T = Threshold
     sceneName=resultFilePath.replace("data/p3d_","").replace("_results.log","")
-   
-    imgOut=Image.new('RGB', (360, 360))
     SPP_Interp = np.zeros((resX,resY))
 
     SPP = []
@@ -156,46 +138,52 @@ def show_thresholdImage_8pov_smooth(resultFilePath,imgDataBasePath,bStereo,final
         for i in range(4):
             SPP.append(T[i + 4*j][1])
     SPP = np.asarray(SPP)
-    #SPP=np.reshape(SPP,(4,4))
-    print("SPP")
-    print(SPP)
-    print(SPP.shape)
+    SPP = np.reshape(SPP,(16,))
 
+    # interpolate SPP level
+    if(method=="nearest"):
+        x=np.asarray([0,1,2,3])
+        y=x
+        g = np.meshgrid(x,y)
+        g=np.append(g[0].reshape(-1,1),g[1].reshape(-1,1),axis=1)
+        g=np.reshape(g,(16,2))
+        f=NearestNDInterpolator(g, SPP)
+        xx,yy=np.meshgrid(np.linspace(-0.5,3.5,resX),np.linspace(-0.5,3.5,resY))
+        img=np.transpose(f(xx,yy))
+    else:
+        f=interp2d([0,1,2,3],[0,1,2,3],SPP,kind=method)
+        img=f(np.linspace(-0.5,3.5,resX),np.linspace(-0.5,3.5,resY))
 
-    eval = lambda x,y : SPP[x][y]
-
-    N=360
-    values = []
-    f=interp2d([0,1,2,3],[0,1,2,3],SPP,kind='linear')
-    img=f(np.linspace(-0.5,3.5,N),np.linspace(-0.5,3.5,N))
-
-    #img=(f)
     SPP_Interp=np.asarray(img,dtype=np.uint32)
     SPP_Interp=np.clip(SPP_Interp,1,500)
-
-    """ side = "1"
-    for i in range(0,resX):
-        print(str(i)+ "/"+str(resX))
-        for j in range(0,resX):
-                im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(SPP_Interp[i,j]).zfill(5) +".png")
-                #region_l = im_l.crop((i, j, i+1, j+1))
-                #imgOut.paste(region_l,(i, j))
-                pixel=im_l.getpixel((i,j))
-                imgOut.putpixel((i,j),pixel) """
-
+    #Image.fromarray(SPP_Interp).show() # debug
     valueList=np.unique(SPP_Interp)
-    side = "1"
-    c=0
+    imgOut=Image.new('RGB', (resX, resY))
+    # for each spp values : load spp image and copy corresponding pixel on final image
     for i in valueList:
-        c=c+1
-        print(str(c)+ "/" + str(len(valueList)))
-        im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(i).zfill(5) +".png")
+        if(side == "right" or side == "left"):
+            im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-"+side+"/p3d_"+sceneName+"-"+side+"_"+  str(i).zfill(5) +".png")
+        else:
+            im_l = Image.open(imgDataBasePath+"/p3d_"+sceneName+"-0"+side+"/p3d_"+sceneName+"-0"+side+"_"+  str(i).zfill(5) +".png")
 
         result = np.where(SPP_Interp == i)
+        #print(result)
         for r in range(0,len(result[0])):
             coord = (int(result[0][r]),int(result[1][r]))
             pixel=im_l.getpixel(coord)
             imgOut.putpixel(coord,pixel)
 
     #imgOut=Image.fromarray(SPP_Interp)
-    imgOut.show()
+    if(show):
+        imgOut.show()
+    else:
+        if(side == "right" or side == "left"):
+            saveDir = "./img/p3d_"+sceneName+"-"+side
+            output=saveDir+"/p3d_"+sceneName+"-"+side+"_00001.png"
+        else:
+            saveDir = "./img/p3d_"+sceneName+"-0"+side
+            output=saveDir+"/p3d_"+sceneName+"-0"+side+"_00001.png"
+        if(not os.path.isdir(saveDir)):
+            os.mkdir(saveDir)
+        imgOut.save(output)
+        print("reconstructed -"+ side + "- image saved to: "+output)
