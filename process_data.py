@@ -51,30 +51,65 @@ def logistic(x,k,x0):
     return y
 
 # likelihood function for fit_logisticFunction_MLE
-# args are [k,x0]
+# args are [dataX,dataY]
+# x = [k,x0]
 def logistic_likelihood(x,*args):
     THETA = x
-    X=np.asarray(args[0],dtype=np.float32)
-    Y=np.asarray(args[1],dtype=np.float32)
+    X=np.asarray(args[0],dtype=np.float64)
+    Y=np.asarray(args[1],dtype=np.float64)
     S=0
-    epsilon = 1e-1
+    epsilon = 1e-5
     for i in range(len(args[0])):
         Sig=sigmoid(THETA[0]*(X[i]-THETA[1]))
         logSig=np.log(Sig+epsilon)
         logOneMinusSig=np.log(1.0-Sig+epsilon)
-        S=S+((Y[i]*logSig*1) + ((1-Y[i])*logOneMinusSig*1))
+        S=S+((Y[i]*logSig) + ((1-Y[i])*logOneMinusSig))
     return S
+
+# grad vector of likelihood function for fit_logisticFunction_MLE
+# args are [dataX,dataY]
+# x = [k,x0]
+def grad_logistic_likelihood(x,*args):
+    grad=[]
+    THETA = x
+    X=np.asarray(args[0],dtype=np.float64)
+    Y=np.asarray(args[1],dtype=np.float64)
+    
+    # partial k
+    S=0
+    for i in range(len(args[0])):
+        Sig=sigmoid(THETA[0]*(X[i]-THETA[1]))
+        SigMinus=sigmoid(-THETA[0]*(X[i]-THETA[1]))
+        S= S + ( (X[i]-THETA[1]) * ((SigMinus * Y[i]) - (Sig * (1-Y[i]))) )
+    grad.append(S)
+
+    # partial x0
+    S=0
+    for i in range(len(args[0])):
+        Sig=sigmoid(THETA[0]*(X[i]-THETA[1]))
+        SigMinus=sigmoid(-THETA[0]*(X[i]-THETA[1]))
+        S= S + ( THETA[0] * ( (Sig * (1-Y[i])) - (SigMinus * Y[i]) ) )
+    grad.append(S)
+    grad=np.asarray(grad)
+    return grad
 
 # fits a logistic function to dataX and dataY
 # uses Maximood likelihood Estimation
 # returns [k,x0]
 def fit_logisticFunction_MLE(dataX,dataY):
     # initial guess
-    x0 = [1,np.median(dataX)]
+    x0 = [0.5,np.median(dataX)]
     # bounds for k and x0
-    l_u_bounds = [(0,2),(1,500)]
-    res = minimize(logistic_likelihood,x0,args=(dataX,dataY),bounds=l_u_bounds)
+    l_u_bounds = [(0,1),(1,500)]
+    # Newton-CG
+    #res = minimize(logistic_likelihood,x0,args=(dataX,dataY),jac=grad_logistic_likelihood,method='Newton-CG')
+    # SLSQP --> better
+    res = minimize(logistic_likelihood,x0,args=(dataX,dataY),bounds=l_u_bounds,jac=grad_logistic_likelihood,method='SLSQP') # L-BFGS-B | TNC
+    # default with bounds
+    #res = minimize(logistic_likelihood,x0,args=(dataX,dataY),bounds=l_u_bounds)
     return res.x
+    #res, pcov=curve_fit(logistic,dataX,dataY,x0, maxfev=5000,bounds=([0,1],[np.inf,500]))
+    return res
 
 # minus heavyside, centered on x0
 # normalized: Norm-2

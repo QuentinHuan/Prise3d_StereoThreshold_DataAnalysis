@@ -14,7 +14,7 @@ import os
 
 # return a list of the perceptive thresholds (refers to the image ID)
 # threshold_spp = 20*threshold[ID]
-def compute_thresholds(resultFilePath,finalEstimation=False):
+def compute_thresholds(resultFilePath,finalEstimation="",fullParam=False):
     T=[]
     dataX=[]
     dataY=[]
@@ -28,15 +28,33 @@ def compute_thresholds(resultFilePath,finalEstimation=False):
         #logistic curve fitting
         params = pd.fit_logisticFunction_MLE(dataX,dataY)
         
-        if(finalEstimation==True):
+        # compute maximum value perceived
+        perceived=[]
+        for r in range(len(dataX)):
+            
+            if(dataY[r]==1):
+                perceived.append(dataX[r])
+            if(len(perceived)>0):
+                maxPerceived = int(max(perceived))
+            else:
+                maxPerceived = 1
+
+        if(finalEstimation=="MP"):
             #MP reconstruction threshold finder
-            params = [1,max(pd.reconstruct_MP(dataX,dataY),params[1])]
-        
-        T.append(max([int(params[1]),1]))
+            params = [params[0],max(pd.reconstruct_MP(dataX,dataY),maxPerceived)]
+        if(finalEstimation=="99perc"):
+            tol=0.99
+            spp_99perc=int(params[1]-(1/params[0])*np.log((1-tol)/tol))
+            #MP reconstruction threshold finder
+            params = [params[0],max(spp_99perc,maxPerceived)]
+        if (fullParam==True):
+            T.append((params[0],max([int(params[1]),maxPerceived])))
+        else:
+            T.append(max([int(params[1]),1]))
     return T
     
 # show the logistic plots and threshold values
-def showResult(Threshold,resultFilePath,finalEstimation=False):
+def showResult(Threshold,resultFilePath,finalEstimation=False,method=""):
     T = Threshold
 
     result=pd.sortDataToXY(resultFilePath)
@@ -50,7 +68,11 @@ def showResult(Threshold,resultFilePath,finalEstimation=False):
 
             #logistic curve plot
             X = np.linspace(1,501,501)
-            Y = pd.logistic(X,params[0],params[1])
+            if(method=="99perc"):
+                tol=0.99
+                Y = pd.logistic(X,params[0],params[1]+(1/params[0])*np.log((1-tol)/tol))
+            else:
+                Y = pd.logistic(X,params[0],params[1])
             axes[i,j].plot(X,Y,"k",linewidth=1)
             axes[i,j].plot(params[1],0.5,"rx")
             axes[i,j].axvline(params[1],ls="--",color="r",ymin=0,ymax=0.5,linewidth=0.5)
@@ -127,7 +149,7 @@ def show_thresholdImage_8pov(resultFilePath,imgDataBasePath,bStereo,finalEstimat
 # generate the reconstructed images (8pov) : smooth transitions between blocks
 # resX and resY resoltuition of the image in pixels
 # side = "1"/"2"/.../"8" for 8pov or "left"/"right" for stereo 
-def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,resY,side,method="nearest",show=False):
+def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,resY,side,method="nearest",show=False,saveDir=""):
     # threshold computation
     T = Threshold
     sceneName=resultFilePath.replace("data/p3d_","").replace("_results.log","")
@@ -155,7 +177,7 @@ def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,res
         img=f(np.linspace(-0.5,3.5,resX),np.linspace(-0.5,3.5,resY))
 
     SPP_Interp=np.asarray(img,dtype=np.uint32)
-    #SPP_Interp=np.clip(SPP_Interp,1,500)
+    SPP_Interp=np.clip(SPP_Interp,1,500)
     #Image.fromarray(SPP_Interp).show() # debug
     valueList=np.unique(SPP_Interp)
     imgOut=Image.new('RGB', (resX, resY))
@@ -179,17 +201,18 @@ def reconstruct_thresholdImage(Threshold,resultFilePath,imgDataBasePath,resX,res
     if(show):
         imgOut.show()
     else:
+        savePathDir = "./img/"+saveDir+"/p3d_"+sceneName
         if(side == "right" or side == "left"):
-            saveDir = "./img/p3d_"+sceneName+"-"+side
-            output=saveDir+"/p3d_"+sceneName+"-"+side+"_00001.png"
+            savePathDir = savePathDir+"-"+side
+            output=savePathDir+"/p3d_"+sceneName+"-"+side+"_00001.png"
         else:
             if(side==""): #2d threshold images
-                saveDir = "./img/p3d_"+sceneName
-                output=saveDir+"/p3d_"+sceneName+"_00001.png"
+                savePathDir = savePathDir
+                output=savePathDir+"/p3d_"+sceneName+"_00001.png"
             else:
-                saveDir = "./img/p3d_"+sceneName+"-0"+side
-                output=saveDir+"/p3d_"+sceneName+"-0"+side+"_00001.png"
-        if(not os.path.isdir(saveDir)):
-            os.mkdir(saveDir)
+                savePathDir = savePathDir+"-0"+side
+                output=savePathDir+"/p3d_"+sceneName+"-0"+side+"_00001.png"
+        if(not os.path.isdir(savePathDir)):
+            os.mkdir(savePathDir)
         imgOut.save(output)
         print("reconstructed -"+ side + "- image saved to: "+output)

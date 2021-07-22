@@ -49,17 +49,25 @@ def rebuild_Stereo():
         print("("+str(c)+"/"+str(len(sceneList))+")")
         path="data/"+s+"_results.log"
 
-        imagePath="/home/stagiaire/Bureau/image/stereo"
-        Threshold = out.compute_thresholds(path,finalEstimation=True)
-        T=[]
-        for i in range(16):
-            T.append(Threshold[i])
-        T=np.asarray(T)
-        print(s+" threshold : ")
-        print(str(20*T))
-
-        for i in ["right","left"]:
-            out.reconstruct_thresholdImage(T,path,imagePath,360,360,str(i),method="nearest",show=False)
+        imagePath="E:/image/stereo"
+        for method in ["99perc",""]:#,"MP","99perc"]:
+            print("Method = " + method)
+            Threshold = out.compute_thresholds(path,finalEstimation=method,fullParam=True)
+            T=[]
+            Sig=[]
+            for i in range(16):
+                T.append(Threshold[i][1])
+                Sig.append(Threshold[i][0])
+            T=np.asarray(T)
+            print(s+" threshold : ")
+            print(str(20*T))
+            print(Sig)
+            #out.reconstruct_thresholdImage(T,path,imagePath,800,800,str("right"),method="nearest",show=False,saveDir=method)
+            out.showResult(Threshold,path,True,method=method)
+            for i in ["right","left"]:
+                out.reconstruct_thresholdImage(T,path,imagePath,800,800,str(i),method="nearest",show=False,saveDir=method)
+        
+        
 
 def rebuild_8pov():
     c=0
@@ -129,6 +137,46 @@ plt.show() """
 
 #rebuild_8pov()
 rebuild_Stereo()
+#plt.show()
+
+"""
+print("-----------------------------------")
+path="data/"+"p3d_indirect"+"_results.log"
+
+def next_stimulus_MLE(dataX,dataY):
+    # experiment beginning: first stimulus is in sampling space center
+    if len(dataX)==0:
+        return 250
+    else:
+        # make sure it's a float32 array
+        dataX=np.asarray(dataX,dtype=np.float32)
+        dataY=np.asarray(dataY,dtype=np.float32)
+        # fit new logistic curve to data
+        params = pd.fit_logisticFunction_MLE(dataX,dataY)
+        X0_estimated=int(params[1])
+
+        return X0_estimated
+
+data = pd.sortDataToXY(path)
+dataX = np.asarray(data[3][0],dtype=np.float32)
+dataY = np.asarray(data[3][1],dtype=np.float32)
+
+i=17
+dataX = np.resize(dataX,dataX.size - i)
+dataY = np.resize(dataY,dataY.size - i)
+
+print(dataX)
+for i in range(40):
+    spp = next_stimulus_MLE(dataX,dataY)
+    dataX=np.append(dataX,spp)
+    if(spp>300):
+        dataY=np.append(dataY,0)
+    else:
+        dataY=np.append(dataY,1)
+
+print(dataX)"""
+
+
 
 
 
