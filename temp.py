@@ -27,7 +27,7 @@ Thresholds={"p3d_arcsphere-view0" : [2733,1640,1560,2533,3693,2166,2506,2833,486
 "p3d_indirect-view0" : [1020,1286,2166,6086,1286,1020,3093,5686,686,1086,2553,3020,420,1486,2086,2753]}
 
 #imagePath="/home/stagiaire/Bureau/image/8pov"
-#imagePath="/home/stagiaire/Bureau/image/stereo"
+imagePath="/home/stagiaire/Bureau/image/stereo"
 #imagePath="E:/image/Stereo"
 
 #path="data/p3d_arcsphere_results.log"
@@ -37,8 +37,8 @@ Thresholds={"p3d_arcsphere-view0" : [2733,1640,1560,2533,3693,2166,2506,2833,486
 #path="data/p3d_indirect_results.log"
 
 sceneList=["p3d_arcsphere","p3d_contemporary-bathroom","p3d_caustic-view0","p3d_crown","p3d_indirect"]
-#sceneList=["p3d_kitchen-view0","p3d_kitchen-view1","p3d_landscape-view3","p3d_sanmiguel-view1","p3d_sanmiguel-view2"]
-#sceneList=["p3d_indirect"]
+sceneList=sceneList+["p3d_kitchen-view0","p3d_kitchen-view1","p3d_landscape-view3","p3d_sanmiguel-view1","p3d_sanmiguel-view2"]
+sceneList=["p3d_kitchen-view1"]
 
 # rebuild Stereo
 def rebuild_Stereo():
@@ -49,7 +49,6 @@ def rebuild_Stereo():
         print("("+str(c)+"/"+str(len(sceneList))+")")
         path="data/"+s+"_results.log"
 
-        imagePath="E:/image/stereo"
         for method in ["99perc",""]:#,"MP","99perc"]:
             print("Method = " + method)
             Threshold = out.compute_thresholds(path,finalEstimation=method,fullParam=True)
@@ -65,7 +64,7 @@ def rebuild_Stereo():
             #out.reconstruct_thresholdImage(T,path,imagePath,800,800,str("right"),method="nearest",show=False,saveDir=method)
             out.showResult(Threshold,path,True,method=method)
             for i in ["right","left"]:
-                out.reconstruct_thresholdImage(T,path,imagePath,800,800,str(i),method="nearest",show=False,saveDir=method)
+                out.reconstruct_thresholdImage(T,path,imagePath,800,800,str(i),method="nearest",show=False)
         
         
 
@@ -78,14 +77,14 @@ def rebuild_8pov():
         path="data/"+s+"_results.log"
 
         imagePath="/home/stagiaire/Bureau/image/8pov"
-        Threshold = out.compute_thresholds(path,finalEstimation=True)
+        Threshold = out.compute_thresholds(path,finalEstimation="99perc",fullParam=True)
         T=[]
         for i in range(16):
-            T.append(Threshold[i])
+            T.append(Threshold[i][1])
         T=np.asarray(T)
         print(s+" threshold : ")
         print(str(20*T))
-
+        out.showResult(Threshold,path,True,method="99perc")
         for i in range(1,9):
             out.reconstruct_thresholdImage(T,path,imagePath,360,360,str(i),method="nearest",show=False)
 
@@ -135,9 +134,9 @@ plt.show() """
 
 
 
-#rebuild_8pov()
-rebuild_Stereo()
-#plt.show()
+rebuild_8pov()
+#rebuild_Stereo()
+plt.show()
 
 """
 print("-----------------------------------")

@@ -21,7 +21,13 @@ def compute_thresholds(resultFilePath,finalEstimation="",fullParam=False):
     result=pd.sortDataToXY(resultFilePath)
     sceneName=resultFilePath.replace("data/","").replace("_results.log","")
     print("compute_thresholds for : " + sceneName)
-    print("number of observations per blocks :"+str(len(result[1][0])))
+    print()
+    print("number of observations per blocks :")
+    print("[",end='')
+    for i in range(16):
+        print(str(len(result[i][0])),end=', ')
+    print("]")
+    print()
     for i in range(16):
         dataX = np.asarray(result[i][0],dtype=np.float32)
         dataY = np.asarray(result[i][1],dtype=np.float32)
@@ -43,8 +49,8 @@ def compute_thresholds(resultFilePath,finalEstimation="",fullParam=False):
             #MP reconstruction threshold finder
             params = [params[0],max(pd.reconstruct_MP(dataX,dataY),maxPerceived)]
         if(finalEstimation=="99perc"):
-            tol=0.99
-            spp_99perc=int(params[1]-(1/params[0])*np.log((1-tol)/tol))
+            tol=0.999
+            spp_99perc=int(params[1]-(1/(params[0]+1e-5))*np.log((1-tol)/tol))
             #MP reconstruction threshold finder
             params = [params[0],max(spp_99perc,maxPerceived)]
         if (fullParam==True):
