@@ -2,21 +2,22 @@ Python scripts for processing captured by [P3D_StereoThreshold](https://github.c
 
 # description:
 
-main scripts:
-* ```main.py```: interface to extract the data from .log Ue4 files and compute the perceptive thresholds
-* ```process_log.py```: module that extracts data form .log Ue4 files
-* ```process_data.py```: module that computes thresholds
-* ```MLE_stimulus.py```: module for MLE procedure (interface and performance tests)
-* ```Output.py```: module for plots, visualisation of the results, and image reconstruction
+lib:
+* ```main_lib.py```: interface to extract the data from .log Ue4 files and compute next stimulus set
+* ```parseLog_lib.py```: module that extracts data from .log files
+* ```processData_lib.py```: module that computes thresholds
+* ```MLE_stimulus_lib.py```: module for MLE procedure (interface and performance tests)
+* ```output_lib.py```: module for plots, visualisation of the results, and image reconstruction
 
 unreal bindings:
-* ```ExperimentAnalysis.py```: analyse .log files and save the results (used by UE4 project)
+* ```ExperimentAnalysis_UE4.py```: analyse .log files and save the results (used by UE4 project)
 * ```ComputeNewStimulusSet.py```: use saved results to compute new stimulus values (used by UE4 project)
 
 alioscopy binding:
 * ```ExperimentAnalysis_Alioscopy.py```: analyse .log files and save the results (used by Alioscopy project)
+* ```ComputeNewStimulusSet.py```: use saved results to compute new stimulus values (used by Alioscopy project)
 
-install scripts:
+install scripts in ``./install``:
 * ```get-pip.py```: install pip on computer
 * ```install.sh```: bash script to install all the dependencies
 

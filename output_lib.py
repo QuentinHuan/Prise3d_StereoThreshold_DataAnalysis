@@ -1,14 +1,13 @@
-# output the results of the analysis
-# 
-#
-import process_data as pd
+"""
+@author: Quentin Huan
+
+collection of various function used to display results, compute thresholds, and reconstruct images
+"""
+import processData_lib as pd
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy.optimize import minimize
 from scipy.interpolate import interp2d
-from scipy.interpolate import griddata
 from scipy.interpolate import NearestNDInterpolator
 import os
 

@@ -1,94 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr 15 11:43:03 2021
+@author: Quentin Huan
 
-@author: Quentin
+
+
 """
-import process_log as pl
+import parseLog_lib as pl
 import utility as u
-import os
-import time
-import shutil
-import errno
-import glob
-
-import process_data as pd
-import Output as out
-
-# process all log files located in logPath
-# save the dataset in ./data
-def process_all_log(logPath):
-    
-    print("##########################")
-    print("  begin data processing   ")
-    print("##########################")
-    path=logPath
-    # list all .log files in PATH
-    logs=u.listFiles(path,[".log"])
-    print(str(len(logs))+" .log files detected in " + path)
-    
-    # remove old files
-    files = glob.glob('./results/*')
-    for f in files:
-        os.remove(f)
-       
-    # ------------------------------------
-    # clean all logs file (remove all the irrelevant UE4 system logs)
-    # ------------------------------------
-    for f in logs:   
-        pl.prune_logFile(path,f)
-    
-    print("cleaning all files done")
-    print("")
-    path="data"
-    
-    # list all .log files in ./data
-    logs=u.listFiles(path,["prune_"])
-    print(str(len(logs))+" clean .log files detected in "+ path)
-    
-    # ------------------------------------
-    # split log files by scene
-    # ------------------------------------
-    for f in logs: 
-        pl.split_logFile(path,f)
-    
-    print("split all files by scene done")
-    
-    # ------------------------------------
-    # analyze each files
-    # ------------------------------------
-    logs=u.listFiles(path,[".log","_2"])
-    print(str(len(logs))+" files in "+ path)
-    i=0
-    for f in logs: 
-        pl.analyze_logFile(path,f)
-        i=i+1
-        print("file annalysis : "+str(i)+"/"+str(len(logs)))
-    
-    print("-------------------------")
-    print("file annalysis done   ")
-    print("-------------------------")
-    
-    # ------------------------------------
-    # get scenelist
-    # ------------------------------------
-    logs=u.listFiles(path,[".log"])
-    sceneList=[]
-    for f in logs:
-        name = f.split("_20")[0] 
-        if name not in sceneList:
-            sceneList.append(name)
-    
-    # ------------------------------------
-    # merge files by scene
-    # ------------------------------------
-    logs=u.listFiles(path,[".log","results"])
-    pl.merge_logFile(path,sceneList,1)
-
-    logs=u.listFiles(path,[".log"])
-    for f in logs:
-        print("generated: " + f)
-
+import processData_lib as pd
+import numpy as np
 
 # process one log files located in logPath, whose name is logName
 # ex: E:/logFolder/mylog.log
@@ -173,5 +93,18 @@ def process_one_log(logPath,logName):
     for f in logs:
         print("generated: " + f)
 
+# generate next stimulus given dataX and dataY
+def next_stimulus_MLE(dataX,dataY):
+    # experiment beginning: first stimulus is in sampling space center
+    if len(dataX)==0:
+        return 25
+    else:
+        # make sure it's a float32 array
+        dataX=np.asarray(dataX,dtype=np.float32)
+        dataY=np.asarray(dataY,dtype=np.float32)
+        # fit new logistic curve to data
+        params = pd.fit_logisticFunction_MLE(dataX,dataY)
+        X0_estimated=int(params[1])
 
+        return X0_estimated
 
