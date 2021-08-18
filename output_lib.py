@@ -64,7 +64,7 @@ def showResult(Threshold,resultFilePath,finalEstimation=False,method=""):
 
     result=pd.sortDataToXY(resultFilePath)
     fig, axes = plt.subplots(4,4, sharex=True, sharey=True)
-    fig.suptitle(resultFilePath.replace("data/","").replace("_results.log","")+" --MP="+str(int(finalEstimation)), fontsize=16)
+    # fig.suptitle(resultFilePath.replace("data/","").replace("_results.log","")+" --MP="+str(int(finalEstimation)), fontsize=16)
     for i in range(4):
         for j in range(4):
             dataX = np.asarray(result[4*i + j][0],dtype=np.float32)
@@ -72,20 +72,25 @@ def showResult(Threshold,resultFilePath,finalEstimation=False,method=""):
             params = T[4*i + j]
 
             #logistic curve plot
-            X = np.linspace(1,501,501)
+            X = np.linspace(-1,501,503)
+            tol=0.5
             if(method=="99perc"):
-                tol=0.99
-                Y = pd.logistic(X,params[0],params[1]+(1/params[0])*np.log((1-tol)/tol))
+                tol=1-0.99
             else:
-                Y = pd.logistic(X,params[0],params[1])
-            axes[i,j].plot(X,Y,"k",linewidth=1)
-            axes[i,j].plot(params[1],0.5,"rx")
-            axes[i,j].axvline(params[1],ls="--",color="r",ymin=0,ymax=0.5,linewidth=0.5)
-            axes[i,j].set_xlabel("seuil("+str(4*i+j)+")="+str(20*int(np.round(params[1])+1))) 
-
+                tol=0.5
+            
             #data points plot
             axes[i,j].set_ylim([0,1.05])
-            axes[i,j].plot(dataX,dataY,"bx")
+            axes[i,j].plot(dataX,dataY,"kx")
+            
+            thresLine = params[1]+(1/params[0])*np.log((1-tol)/tol)
+            Y = pd.logistic(X,params[0],params[1])
+
+            axes[i,j].plot(X,Y,"r",linewidth=1)
+            axes[i,j].axvline(thresLine,ls="--",color="g",ymin=0,ymax=1,linewidth=0.5)
+            axes[i,j].plot(thresLine,tol,"g.")
+            axes[i,j].set_xlabel("seuil("+str(4*i+j)+")="+str(20*int(np.round(params[1])+1))) 
+
 
     plt.setp(axes[:, 0], ylabel='P_detection(spp)')
 
